@@ -1,0 +1,106 @@
+class Contact:
+    def __init__(self, name, phone_number, email, address):
+        self.name = name
+        self.phone_number = phone_number
+        self.email = email
+        self.address = address
+
+
+contact_list = []
+
+
+def add_contact():
+    print("\nAdd a New Contact:")
+    name = input("Name: ")
+    phone_number = input("Phone Number: ")
+    email = input("Email: ")
+    address = input("Address: ")
+    contact = Contact(name, phone_number, email, address)
+    contact_list.append(contact)
+    print("Contact added successfully.\n")
+
+
+def view_contact_list():
+    print("\nContact List:")
+    if contact_list:
+        for i, contact in enumerate(contact_list, start=1):
+            print(f"{i}. {contact.name} - {contact.phone_number}")
+    else:
+        print("Contact list is empty.\n")
+
+
+def search_contact():
+    print("\nSearch Contact:")
+    search_term = input("Enter a name or phone number to search: ")
+    search_results = []
+    for contact in contact_list:
+        if (
+            search_term.lower() in contact.name.lower()
+            or search_term in contact.phone_number
+        ):
+            search_results.append(contact)
+    if search_results:
+        print("\nSearch Results:")
+        for i, contact in enumerate(search_results, start=1):
+            print(f"{i}. {contact.name} - {contact.phone_number}")
+    else:
+        print("No matching contacts found.\n")
+
+
+def update_contact():
+    print("\nUpdate Contact:")
+    view_contact_list()
+    if contact_list:
+        contact_index = int(input("Enter the index of the contact to update: ")) - 1
+        if 0 <= contact_index < len(contact_list):
+            contact = contact_list[contact_index]
+            print(f"\nUpdating contact: {contact.name}")
+            contact.name = input("New Name: ")
+            contact.phone_number = input("New Phone Number: ")
+            contact.email = input("New Email: ")
+            contact.address = input("New Address: ")
+            print("Contact updated successfully.\n")
+        else:
+            print("Invalid contact index.\n")
+
+
+def delete_contact():
+    print("\nDelete Contact:")
+    view_contact_list()
+    if contact_list:
+        contact_index = int(input("Enter the index of the contact to delete: ")) - 1
+        if 0 <= contact_index < len(contact_list):
+            contact = contact_list.pop(contact_index)
+            print(f"Deleted contact: {contact.name}\n")
+        else:
+            print("Invalid contact index.\n")
+
+
+def user_interface():
+    while True:
+        print("Contact Management System")
+        print("1. Add Contact")
+        print("2. View Contact List")
+        print("3. Search Contact")
+        print("4. Update Contact")
+        print("5. Delete Contact")
+        print("0. Exit")
+        choice = input("Enter your choice: ")
+        if choice == "1":
+            add_contact()
+        elif choice == "2":
+            view_contact_list()
+        elif choice == "3":
+            search_contact()
+        elif choice == "4":
+            update_contact()
+        elif choice == "5":
+            delete_contact()
+        elif choice == "0":
+            print("Exiting...")
+            break
+        else:
+            print("Invalid choice. Please try again.\n")
+
+
+user_interface()
