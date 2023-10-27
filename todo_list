@@ -1,0 +1,190 @@
+import tkinter
+from tkinter import *
+
+class Task:
+    def __init__(self, name, due_date, priority, status):
+        self.name = name
+        self.due_date = due_date
+        self.priority = priority
+        self.status = status
+
+root = Tk()
+root.title("To-Do-List")
+root.geometry("400x650+400+100")
+root.resizable(False, False)
+
+task_list = []
+
+def addTask():
+    task = task_entry.get()
+    task_entry.delete(0, END)
+
+    if task:
+        new_task = Task(task, "", "", "Incomplete")  # Create a new Task instance
+        task_list.append(new_task)
+        listbox.insert(END, u'\u2022 ' + task)
+
+        # Create a new window for entering additional details
+        details_window = Toplevel(root)
+        details_window.title("Task Details")
+
+        # Create labels and entry fields for the additional details
+        Label(details_window, text="Due Date:").pack()
+        due_date_entry = Entry(details_window)
+        due_date_entry.pack()
+
+        Label(details_window, text="Priority:").pack()
+        priority_entry = Entry(details_window)
+        priority_entry.pack()
+
+        Label(details_window, text="Status:").pack()
+        status_entry = Entry(details_window)
+        status_entry.pack()
+
+        def saveDetails():
+            new_task.due_date = due_date_entry.get()
+            new_task.priority = priority_entry.get()
+            new_task.status = status_entry.get()
+            with open("soft\\todo_list\\tasklist.txt", 'a') as taskfile:
+                taskfile.write(f"{new_task.name},{new_task.due_date},{new_task.priority},{new_task.status}\n")
+            details_window.destroy()
+
+        # Create a button to save the details
+        Button(details_window, text="Save Details", command=saveDetails).pack()
+def deleteTask():
+    global task_list
+    task_index = listbox.curselection()
+    if task_index:
+        task_index = task_index[0]
+        task = task_list[task_index]
+        task_list.remove(task)
+        with open("soft\\todo_list\\tasklist.txt", 'w') as taskfile:
+            for task in task_list:
+                taskfile.write(f"{task}\n")
+
+        listbox.delete(task_index)
+
+def editTask():
+    global task_list
+    task_index = listbox.curselection()
+    if task_index:
+        task_index = task_index[0]
+        task = task_list[task_index]
+
+        # Create a new window for editing the task
+        edit_window = Toplevel(root)
+        edit_window.title("Edit Task")
+
+        # Create an entry field and set its initial text to the task name
+        edit_entry = Entry(edit_window, font="arial 20", bd=0)
+        edit_entry.insert(0,u'\u2022 ' + task.name)
+        edit_entry.pack(pady=10)
+
+        # Create entry fields for the additional details
+        Label(edit_window, text="Due Date:").pack()
+        due_date_entry = Entry(edit_window)
+        due_date_entry.insert(0, task.due_date)
+        due_date_entry.pack()
+
+        Label(edit_window, text="Priority:").pack()
+        priority_entry = Entry(edit_window)
+        priority_entry.insert(0, task.priority)
+        priority_entry.pack()
+
+        Label(edit_window, text="Status:").pack()
+        status_entry = Entry(edit_window)
+        status_entry.insert(0, task.status)
+        status_entry.pack()
+
+        def saveEdit():
+            try:
+                new_task_name = edit_entry.get()
+                if new_task_name:
+                    task_index = listbox.curselection()
+                    if task_index:
+                        task_index = task_index[0]
+                        task = task_list[task_index]
+                        task.name = new_task_name
+                        task.due_date = due_date_entry.get()
+                        task.priority = priority_entry.get()
+                        task.status = status_entry.get()
+                        listbox.delete(task_index)
+                        listbox.insert(task_index, new_task_name)
+                        with open("tasklist.txt", 'w') as taskfile:
+                            for task in task_list:
+                                taskfile.write(f"{task.name},{task.due_date},{task.priority},{task.status}\n")
+            except IOError:
+                # Handle the IOError here (e.g., display an error message)
+                print("An error occurred while saving the task file.")
+        
+        Button(edit_window, text="Save Edits", command=saveEdit).pack()
+
+
+def openTaskFile():
+    try:
+        listbox.delete(0, END)
+        task_list.clear()
+
+        with open("soft\\todo_list\\tasklist.txt", 'r') as taskfile:
+            for line in taskfile:
+                task_details = line.strip().split(',')
+                if len(task_details) == 4:
+                    task = Task(task_details[0], task_details[1], task_details[2], task_details[3])
+                    task_list.append(task)
+                    listbox.insert(END, task.name)
+    except IOError:
+        # Handle the IOError here (e.g., display an error message)
+        print("An error occurred while opening the task file.")
+
+#icon   
+Image_icon = PhotoImage(file="soft\\todo_list\\Image\\task.png")
+root.iconphoto(False, Image_icon)
+
+#top bar
+TopImage = PhotoImage(file="soft\\todo_list\\Image\\TopPbar.png")
+Label(root, image=TopImage).pack()
+
+dockImage = PhotoImage(file="soft\\todo_list\\Image\\dock.png")
+Label(root, image=dockImage, bg="#2a363b").place(x=30, y=25)
+
+noteImage = PhotoImage(file="soft\\todo_list\\Image\\icons8-todo-list-64.png")
+Label(root, image=noteImage, bg="#2a363b").place(x=30, y= 25)
+
+heading = Label(root, text="TASKS TODO", font="arial 20 bold", fg="white", bg="#2a363b")
+heading.place(x=130, y=20)
+
+#main
+frame = Frame(root, width=400, height=50, bg="white")
+frame.place(x=0, y=180)
+
+task = StringVar()
+task_entry = Entry(frame, width=18, font="arial 20", bd=0)
+task_entry.place(x=10, y=7)
+task_entry.focus()
+
+button = Button(frame, text="ADD", font="arial 20 bold", width=6, bg="#99B898", fg="#fff", bd=0, command=addTask)
+button.place(x=300, y=0)
+
+#listbox
+frame1 = Frame(root, bd=3, width=700, height=200, bg="#2a363b")
+frame1.pack(pady=(160, 0))
+
+listbox = Listbox(frame1, font=('arial', 12), width=40, height=16, bg="#2A363B", fg="white", cursor="hand2", selectbackground="#99b898")
+listbox.pack(side=LEFT, fill=BOTH, padx=2)
+scrollbar = Scrollbar(frame1)
+scrollbar.pack(side=RIGHT, fill=BOTH)
+
+listbox.config(yscrollcommand=scrollbar)
+scrollbar.config(command=listbox.yview)
+
+openTaskFile()
+
+#delete
+Delete_icon = PhotoImage(file="soft\\todo_list\\Image\\delete.png")
+Button(root, image=Delete_icon, bd=0,command=deleteTask).pack(side=BOTTOM, pady=8)
+
+#edit
+editButton = Button(root, text="EDIT", font="arial 20 bold", width=8, bg="#99B898", fg="#fff", bd=0, command=editTask).pack(side=BOTTOM, pady=0)
+
+
+root.mainloop()
